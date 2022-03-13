@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
-setup(name='TeleDjan_Auth',
-      version='0.1',
+setup(name='teledjan_auth',
+      version='0.2',
       url='https://github.com/rouelboom/TeleDjan_Auth',
       license='MIT',
       author='Pavel Senokosov',
       author_email='rouel.boom@gmail.com',
-      description='Lib for auth to djoser by telegram bot with using of Django ORM',
+      description='Lib for auth to api by telegram bot using Django ORM',
       packages=find_packages(exclude=['tests']),
       long_description=open('README.md').read(),
       zip_safe=False)

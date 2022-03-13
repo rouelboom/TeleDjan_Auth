@@ -7,7 +7,7 @@ import requests
 from cryptography.fernet import Fernet
 
 
-class TeleDjan_Auth():
+class TeleDjanAuth:
     """
     Using of this library implies that you have django server, some API and you need to
     create new user for login to API with telegram
@@ -16,6 +16,7 @@ class TeleDjan_Auth():
 
     """
     key = None
+
     def __init__(self, relations_table, url_login, url_new_user, crypto_key,
                  ):
         self.relations_table = relations_table
@@ -141,7 +142,6 @@ class TeleDjan_Auth():
                     and sum(c.isdigit() for c in password) >= 3):
                 break
         return password
-
 
     def authenticate_by_telegram(self, user_id: dict) -> str:
         """
