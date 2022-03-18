@@ -41,14 +41,7 @@ class TeleDjanAuth:
     def _login_by_id(self, user_id):
         username = self._get_username_from_relations_table(user_id)
         password = self._get_password_from_relations_table(user_id)
-        response = requests.post(self.url_login, data={'username': username,
-                                                       'password': password})
-        if response.status_code != 200:
-            return {'error': f'status code {response.status_code}'}
-        token = response.json().get('auth_token')
-        if token is None:
-            return {'error': 'no token in response'}
-        return token
+        return self._login(username, password)
 
     def _update_token_in_relations_table(self, user_id, token):
         """
@@ -58,7 +51,7 @@ class TeleDjanAuth:
         :return:
         """
         try:
-            token = self._encrypt()
+            token = self._encrypt(token)
             relation = self.relations_table.objects.get(user_id=user_id)
             relation.token = token
             relation.save(update_fields=['token'])
@@ -153,26 +146,25 @@ class TeleDjanAuth:
         """
         username = str(user_id)
         current_user = self.relations_table.objects.filter(user_id=user_id)
-
         if not current_user:
             new_password = self.generate_password()
             encrypted_password = self._encrypt(new_password)
             result = self._create_user(username, new_password)
-            if 'error' in result:
+            if result and 'error' in result:
                 return f'error {result["error"]}'
             token = self._login(username, new_password)
-            if 'error' in token:
+            if result and 'error' in result:
                 return f'error {token["error"]}'
             encrypted_token = self._encrypt(token)
-            self.relations_table.objects.create(user_id=user_id, password=encrypted_password,
-                                                username=username, token=encrypted_token,
-                                                last_update=datetime.now(tz=pytz.UTC).isoformat())
-            return token
 
+            last_update=datetime.datetime.now(tz=pytz.UTC).isoformat()
+            self.relations_table.objects.create(user_id=user_id, password=encrypted_password,
+                                                username=username, token=encrypted_token, last_update=last_update)
+            return token
         token = self._login_by_id(user_id)
-        if token.get('error'):
+        if isinstance(token, dict) and token.get('error'):
             return f'error {token["error"]}'
         result = self._update_token_in_relations_table(user_id, token)
-        if result.get('error'):
+        if isinstance(result, dict) and result.get('error'):
             return f'error {result["error"]}'
         return token
